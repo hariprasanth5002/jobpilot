@@ -432,6 +432,4 @@ Navigate to `http://127.0.0.1:5173` in your browser.
 
 ---
 
-## 24. License
 
-Distributed under the MIT License.
