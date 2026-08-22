@@ -136,6 +136,17 @@ def generate_answer(
     """
     # Guardrail Check
     if not validated_guardrail_result.allowed:
+        # -------------------------------------------------------------------
+        # DEBUG: GUARDRAIL BLOCKED LOGGING
+        # -------------------------------------------------------------------
+        print()
+        print("============================================================")
+        print("LLM GENERATION — BLOCKED BY GUARDRAIL")
+        print("============================================================")
+        print(f"Warnings : {validated_guardrail_result.warnings}")
+        print(f"Ollama Call: SKIPPED — insufficient/irrelevant context.")
+        print("============================================================")
+        print()
         return {
             "allowed": False,
             "intent": intent,
@@ -157,12 +168,56 @@ def generate_answer(
         prompt_context=validated_guardrail_result.prompt_context,
     )
 
+    # -------------------------------------------------------------------
+    # DEBUG: LLM GENERATION LOGGING
+    # -------------------------------------------------------------------
+    print()
+    print("============================================================")
+    print("LLM GENERATION")
+    print("============================================================")
+    print(f"Model       : {ollama_client.model}")
+    print(f"Temperature : 0.1")
+    print()
+    print("FINAL PROMPT SENT TO OLLAMA")
+    print("------------------------------------------------------------")
+    print(user_prompt.encode('ascii', errors='replace').decode('ascii'))
+    print("------------------------------------------------------------")
+    print()
+    print("Calling Ollama...")
+    print("============================================================")
+    print()
+
     # Call Ollama
-    answer = ollama_client.generate(
-        prompt=user_prompt,
-        system_prompt=system_prompt,
-        temperature=0.1,
-    )
+    try:
+        answer = ollama_client.generate(
+            prompt=user_prompt,
+            system_prompt=system_prompt,
+            temperature=0.1,
+        )
+    except Exception as ollama_err:
+        print()
+        print("============================================================")
+        print("OLLAMA ERROR")
+        print("============================================================")
+        print(str(ollama_err))
+        print("============================================================")
+        print()
+        raise
+
+    # -------------------------------------------------------------------
+    # DEBUG: OLLAMA RESPONSE LOGGING
+    # -------------------------------------------------------------------
+    print()
+    print("============================================================")
+    print("OLLAMA RESPONSE")
+    print("============================================================")
+    print(f"Model      : {ollama_client.model}")
+    print(f"Generation : SUCCESS")
+    print()
+    print(answer.encode('ascii', errors='replace').decode('ascii'))
+    print()
+    print("============================================================")
+    print()
 
     return {
         "allowed": True,

@@ -247,13 +247,37 @@ def run_pipeline(question: str) -> Dict[str, Any]:
     #   Off-topic passphrase best dist:   1.36  →  correctly blocked
     if retrieval_response.results:
         best_distance = min(r.get("distance", 999.0) for r in retrieval_response.results)
+
+        # -------------------------------------------------------------------
+        # DEBUG: RELEVANCE GUARDRAIL LOGGING
+        # -------------------------------------------------------------------
+        print()
+        print("============================================================")
+        print("RELEVANCE GUARDRAIL")
+        print("============================================================")
+        print(f"Best FAISS Distance : {best_distance:.6f}")
+        print(f"Allowed Threshold   : {RELEVANCE_THRESHOLD:.6f}")
+        print()
+
         if best_distance > RELEVANCE_THRESHOLD:
+            print(f"Decision  : BLOCK")
+            print(f"Reason    : Best retrieved result exceeds relevance threshold.")
+            print()
+            print(f"Context cleared.")
+            print(f"Ollama Call: SKIPPED")
+            print("============================================================")
+            print()
             retrieval_response = RetrievalResponse(
                 question=retrieval_response.question,
                 intent=retrieval_response.intent,
                 retrieval_strategy=retrieval_response.retrieval_strategy,
                 results=[],
             )
+        else:
+            print(f"Decision  : PASS")
+            print(f"Reason    : Relevant context found.")
+            print("============================================================")
+            print()
 
     # 3. Build structured context from (filtered) retrieval results
     context = build_context(

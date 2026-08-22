@@ -79,6 +79,42 @@ def build_context(
             # Fallback based on metadata or default to user_details
             user_chunks.append(chunk_entry)
 
+    # -------------------------------------------------------------------
+    # DEBUG: CONTEXT BUILDER LOGGING
+    # -------------------------------------------------------------------
+    print()
+    print("============================================================")
+    print("CONTEXT BUILDER")
+    print("============================================================")
+    print(f"Intent               : {intent}")
+    print()
+    print(f"Resume Chunks        : {len(resume_chunks)}")
+    print(f"Job Description Chunks: {len(jd_chunks)}")
+    print(f"User Details Chunks  : {len(user_chunks)}")
+    print()
+    active_sources = []
+    if resume_chunks:
+        active_sources.append("resume")
+    if jd_chunks:
+        active_sources.append("job_description")
+    if user_chunks:
+        active_sources.append("user_details")
+    print("Final Context Sources:")
+    for src in active_sources:
+        print(f"  - {src}")
+    print()
+    print("Selected Chunk Details:")
+    for c in resume_chunks:
+        print(f"  [resume]          Chunk ID {c['chunk_id']:>3} | Section: {c['section']}")
+    for c in jd_chunks:
+        print(f"  [job_description] Chunk ID {c['chunk_id']:>3} | Section: {c['section']}")
+    for c in user_chunks:
+        print(f"  [user_details]    Chunk ID {c['chunk_id']:>3} | Section: {c['section']}")
+    if not active_sources:
+        print("  (no chunks — guardrail will block LLM call)")
+    print("============================================================")
+    print()
+
     return StructuredContext(
         question=question.strip() if question else "",
         intent=intent,

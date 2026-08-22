@@ -153,6 +153,22 @@ class Retriever:
         candidate_k = min(total_vectors, max(top_k * 3, 10))
         faiss_ids, distances = store.search(query_vector, k=candidate_k)
 
+        # -------------------------------------------------------------------
+        # DEBUG: RETRIEVAL LOGGING
+        # -------------------------------------------------------------------
+        print()
+        print("============================================================")
+        print("JOBPILOT RETRIEVAL")
+        print("============================================================")
+        print(f"Query    : {clean_question}")
+        print(f"Intent   : {intent}")
+        print(f"Strategy : {retrieval_strategy}")
+        print(f"")
+        print(f"FAISS IndexFlatL2: returns {candidate_k} nearest neighbours.")
+        print(f"Lower L2 distance = greater semantic similarity.")
+        print(f"Total vectors in index: {total_vectors}")
+        print()
+
         # 5. Metadata lookup & candidate preparation
         candidates: List[Dict[str, Any]] = []
         for fid, dist in zip(faiss_ids, distances):
@@ -185,6 +201,12 @@ class Retriever:
         # Sort candidates using source prioritization
         prioritized_candidates = sorted(candidates, key=ranking_key)
 
+        # -------------------------------------------------------------------
+        # DEBUG: TOP-K RESULTS LOGGING
+        # -------------------------------------------------------------------
+        print(f"Top-{top_k} Results after Source Prioritization Reranking:")
+        print("------------------------------------------------------------")
+
         # 7. Select Top-K and build result models
         final_results: List[Dict[str, Any]] = []
         for rank, item in enumerate(prioritized_candidates[:top_k], start=1):
@@ -198,6 +220,20 @@ class Retriever:
                 distance=item["distance"],
             )
             final_results.append(retrieved_chunk.to_dict())
+            print(f"Rank     : {rank}")
+            print(f"FAISS ID : {item['faiss_id']}")
+            print(f"Chunk ID : {item['chunk_id']}")
+            print(f"Distance : {item['distance']:.6f}")
+            print(f"Source   : {item['source']}")
+            print(f"Section  : {item['section']}")
+            text_preview = item['text'].replace('\n', ' ').strip()
+            safe_preview = text_preview[:200].encode('ascii', errors='replace').decode('ascii')
+            print(f"Text     : {safe_preview}{'...' if len(text_preview) > 200 else ''}")
+            print()
+
+        print(f"Total retrieved chunks: {len(final_results)}")
+        print("============================================================")
+        print()
 
         return RetrievalResponse(
             question=clean_question,
