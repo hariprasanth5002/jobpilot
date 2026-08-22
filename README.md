@@ -422,14 +422,5 @@ Navigate to `http://127.0.0.1:5173` in your browser.
 
 ---
 
-## 23. Technical Interview Pitch (60 Seconds)
-
-> *"JobPilot is a local, privacy-first AI career assistant built to analyze candidate resumes and job descriptions using RAG. Unlike generic chatbots that hallucinate experience, JobPilot parses PDFs into section-aware chunks, embeds them into a 384-dimensional vector space using `all-MiniLM-L6-v2`, and indexes them in FAISS IndexFlatL2.*
->
-> *When a user asks a question, our Query Understanding layer determines the intent (like SKILL_GAP or PROJECT_GUIDANCE) and applies source-prioritization reranking. Before invoking our local Ollama `gemma3:1b` model, a context guardrail checks distance metrics—if the best matching chunk exceeds an L2 distance threshold of 1.30, generation is blocked immediately to prevent hallucination.*
->
-> *The entire system runs on a FastAPI orchestrator with a React 19 / Vite frontend."*
-
----
 
 
